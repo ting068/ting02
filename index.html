@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>楊喻婷 BMI 計算器</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&family=Sacramento&display=swap');
+
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 50%, #ffd1dc 100%);
+            min-height: 100vh;
+        }
+
+        /* Lace Border Patterns using SVG Data URIs */
+        .lace-top-border {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='15' viewBox='0 0 40 15'%3E%3Cpath d='M0 0 Q 10 15, 20 0 Q 30 15, 40 0' fill='none' stroke='%25ffb6c1' stroke-width='3'/%3E%3Ccircle cx='10' cy='6' r='1.5' fill='%25ffb6c1'/%3E%3Ccircle cx='30' cy='6' r='1.5' fill='%25ffb6c1'/%3E%3C/svg%3E");
+            background-repeat: repeat-x;
+            height: 15px;
+        }
+
+        .lace-card {
+            background-color: rgba(255, 255, 255, 0.92);
+            border: 4px solid #ffc0cb;
+            box-shadow: 0 12px 35px rgba(255, 182, 193, 0.45), inset 0 0 15px rgba(255, 240, 245, 0.8);
+            border-radius: 32px;
+            position: relative;
+        }
+
+        /* Scalloped Lace Edges for Main Container */
+        .lace-card::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: -12px;
+            right: -12px;
+            bottom: -12px;
+            border: 2px dashed #f472b6;
+            border-radius: 40px;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Cute Input Styling */
+        .pink-input {
+            background: #fffdfd;
+            border: 2.5px solid #fbcfe8;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 5px rgba(255, 182, 193, 0.15);
+        }
+
+        .pink-input:focus {
+            border-color: #f472b6;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(244, 114, 182, 0.25);
+            outline: none;
+        }
+
+        /* Sparkle & Ribbon Button */
+        .ribbon-btn {
+            background: linear-gradient(135deg, #f472b6 0%, #fb7185 100%);
+            box-shadow: 0 6px 18px rgba(244, 114, 182, 0.4);
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .ribbon-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 22px rgba(244, 114, 182, 0.55);
+        }
+
+        .ribbon-btn:active {
+            transform: translateY(1px) scale(0.98);
+        }
+
+        /* Ribbon SVG Icon Pulsing */
+        .bow-pulse {
+            animation: bowWiggle 2.5s infinite ease-in-out;
+        }
+
+        @keyframes bowWiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-6deg); }
+            75% { transform: rotate(6deg); }
+        }
+
+        /* BMI Indicator Bar Marker */
+        #bmi-marker {
+            transition: left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Custom Scrollbar for results if needed */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #fbcfe8;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4 md:p-8">
+
+    <!-- Main Container Card -->
+    <div class="lace-card w-full max-w-md p-6 md:p-8 my-auto relative z-10">
+
+        <!-- Top Decorative Ribbon Accent -->
+        <div class="absolute -top-7 left-1/2 -translate-x-1/2 z-20 bow-pulse">
+            <svg width="70" height="50" viewBox="0 0 100 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Ribbon Left Loop -->
+                <path d="M50 35 C20 10, 5 25, 20 40 C35 55, 45 40, 50 35 Z" fill="#f472b6" stroke="#f43f5e" stroke-width="2"/>
+                <path d="M42 33 C25 20, 15 28, 25 38" stroke="#fbcfe8" stroke-width="2" stroke-linecap="round"/>
+                <!-- Ribbon Right Loop -->
+                <path d="M50 35 C80 10, 95 25, 80 40 C65 55, 55 40, 50 35 Z" fill="#f472b6" stroke="#f43f5e" stroke-width="2"/>
+                <path d="M58 33 C75 20, 85 28, 75 38" stroke="#fbcfe8" stroke-width="2" stroke-linecap="round"/>
+                <!-- Ribbon Tails -->
+                <path d="M45 38 L30 65 L42 60 L48 42 Z" fill="#fb7185"/>
+                <path d="M55 38 L70 65 L58 60 L52 42 Z" fill="#fb7185"/>
+                <!-- Center Knot -->
+                <rect x="44" y="29" width="12" height="12" rx="4" fill="#f43f5e" stroke="#fff" stroke-width="1.5"/>
+            </svg>
+        </div>
+
+        <!-- Header Title -->
+        <header class="text-center mt-4 mb-6">
+            <h1 class="text-2xl md:text-3xl font-black text-pink-600 tracking-wider flex items-center justify-center gap-2">
+                <span>🎀</span> 楊喻婷 BMI 計算器 <span>🎀</span>
+            </h1>
+            <p class="text-xs text-pink-400 font-bold mt-1 tracking-widest uppercase">
+                ✧ Pink Lace & Ribbon Edition ✧
+            </p>
+            <div class="lace-top-border w-full mt-3 opacity-70"></div>
+        </header>
+
+        <!-- Form Inputs -->
+        <form id="bmi-form" onsubmit="event.preventDefault(); calculateBMI();" class="space-y-4">
+            
+            <!-- Height Input -->
+            <div>
+                <label for="height" class="block text-sm font-bold text-pink-700 mb-1 flex items-center gap-1">
+                    <i class="fas fa-ruler-vertical text-pink-400"></i> 身高 (Height)
+                </label>
+                <div class="relative">
+                    <input type="number" id="height" step="0.1" min="50" max="250" placeholder="例如：160" required
+                        class="pink-input w-full px-4 py-3 rounded-2xl text-pink-900 font-bold placeholder-pink-300 text-lg">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-pink-400 font-bold text-sm">cm</span>
+                </div>
+            </div>
+
+            <!-- Weight Input -->
+            <div>
+                <label for="weight" class="block text-sm font-bold text-pink-700 mb-1 flex items-center gap-1">
+                    <i class="fas fa-weight-scale text-pink-400"></i> 體重 (Weight)
+                </label>
+                <div class="relative">
+                    <input type="number" id="weight" step="0.1" min="10" max="300" placeholder="例如：52" required
+                        class="pink-input w-full px-4 py-3 rounded-2xl text-pink-900 font-bold placeholder-pink-300 text-lg">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-pink-400 font-bold text-sm">kg</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3 pt-2">
+                <button type="submit" 
+                    class="ribbon-btn flex-1 py-3.5 px-4 rounded-2xl text-white font-black text-lg tracking-wide flex items-center justify-center gap-2">
+                    <i class="fas fa-sparkles text-amber-200"></i> 開始計算
+                </button>
+                <button type="button" onclick="resetForm()" 
+                    class="bg-pink-100 hover:bg-pink-200 text-pink-600 font-bold px-4 rounded-2xl transition active:scale-95 border-2 border-pink-200 flex items-center justify-center">
+                    <i class="fas fa-rotate-right"></i>
+                </button>
+            </div>
+        </form>
+
+        <!-- Result Section (Initially Hidden or Animated) -->
+        <div id="result-card" class="mt-6 pt-5 border-t-2 border-dashed border-pink-200 hidden">
+            
+            <!-- BMI Value & Status -->
+            <div class="text-center bg-pink-50/80 p-4 rounded-2xl border border-pink-200 relative overflow-hidden">
+                <span class="text-xs font-bold text-pink-400 uppercase tracking-wider">Your BMI Result</span>
+                
+                <div class="flex items-baseline justify-center gap-2 my-1">
+                    <span id="bmi-val" class="text-4xl md:text-5xl font-black text-pink-600">0.0</span>
+                </div>
+
+                <div id="status-badge" class="inline-block px-4 py-1.5 rounded-full font-black text-sm text-white shadow-sm my-1 bg-pink-400">
+                    計算中...
+                </div>
+
+                <p id="weight-advice" class="text-xs font-bold text-pink-600 mt-2">
+                    理想體重區間：-- ~ -- kg
+                </p>
+            </div>
+
+            <!-- BMI Gauge Visual Indicator -->
+            <div class="mt-5">
+                <div class="flex justify-between text-[10px] font-bold text-pink-500 mb-1 px-1">
+                    <span>過輕 (&lt;18.5)</span>
+                    <span>正常 (18.5-24)</span>
+                    <span>過重 (24-27)</span>
+                    <span>肥胖 (&gt;27)</span>
+                </div>
+
+                <!-- Gradient Bar -->
+                <div class="h-3.5 w-full rounded-full bg-gradient-to-r from-blue-300 via-emerald-300 via-amber-300 to-rose-400 relative p-0.5 shadow-inner">
+                    <!-- Marker Bow -->
+                    <div id="bmi-marker" class="absolute top-1/2 -translate-y-1/2 -ml-2.5 transition-all duration-500" style="left: 0%;">
+                        <div class="w-5 h-5 bg-white border-2 border-pink-500 rounded-full shadow-md flex items-center justify-center">
+                            <div class="w-2 h-2 bg-pink-500 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Healthy Tip -->
+            <div class="mt-4 text-center">
+                <p id="health-tip" class="text-xs text-pink-500 font-bold bg-white/60 p-2.5 rounded-xl border border-pink-100">
+                    💖 保持均衡飲食與愉快心情，妳是最美麗的！
+                </p>
+            </div>
+        </div>
+
+        <!-- Card Bottom Lace Feature -->
+        <div class="lace-top-border w-full mt-6 rotate-180 opacity-70"></div>
+    </div>
+
+    <!-- JS Logic -->
+    <script>
+        function calculateBMI() {
+            const hInput = document.getElementById('height').value;
+            const wInput = document.getElementById('weight').value;
+
+            if (!hInput || !wInput || hInput <= 0 || wInput <= 0) return;
+
+            const heightM = hInput / 100;
+            const weightKg = parseFloat(wInput);
+            const bmi = parseFloat((weightKg / (heightM * heightM)).toFixed(1));
+
+            // Elements
+            const resultCard = document.getElementById('result-card');
+            const bmiValDisplay = document.getElementById('bmi-val');
+            const statusBadge = document.getElementById('status-badge');
+            const weightAdvice = document.getElementById('weight-advice');
+            const healthTip = document.getElementById('health-tip');
+            const marker = document.getElementById('bmi-marker');
+
+            // Calculate ideal weight range (BMI 18.5 - 23.9)
+            const minIdealW = (18.5 * heightM * heightM).toFixed(1);
+            const maxIdealW = (23.9 * heightM * heightM).toFixed(1);
+
+            // Determine Category Status (Taiwan MOHW Standards)
+            let category = '';
+            let colorClass = '';
+            let adviceText = '';
+            let markerPercent = 0;
+
+            if (bmi < 18.5) {
+                category = '體重過輕';
+                colorClass = 'bg-blue-400';
+                adviceText = '💖 稍微偏瘦囉，多補充優質蛋白質與營養吧！';
+                markerPercent = Math.max(5, (bmi / 18.5) * 25);
+            } else if (bmi >= 18.5 && bmi < 24) {
+                category = '體重正常';
+                colorClass = 'bg-emerald-400';
+                adviceText = '✨ 太棒了！體重維持在理想範疇，繼續保持！';
+                markerPercent = 25 + ((bmi - 18.5) / (24 - 18.5)) * 25;
+            } else if (bmi >= 24 && bmi < 27) {
+                category = '體重過重';
+                colorClass = 'bg-amber-400';
+                adviceText = '🌸 稍微過重囉！適度搭配運動與輕食會更好～';
+                markerPercent = 50 + ((bmi - 24) / (27 - 24)) * 25;
+            } else if (bmi >= 27 && bmi < 30) {
+                category = '輕度肥胖';
+                colorClass = 'bg-orange-400';
+                adviceText = '🎀 提醒妳要注意飲食結構與增加有氧運動喔！';
+                markerPercent = 75 + ((bmi - 27) / 3) * 12.5;
+            } else if (bmi >= 30 && bmi < 35) {
+                category = '中度肥胖';
+                colorClass = 'bg-rose-500';
+                adviceText = '🌷 為了健康，建議開始制定微減脂計畫！';
+                markerPercent = 87.5 + ((bmi - 30) / 5) * 7.5;
+            } else {
+                category = '重度肥胖';
+                colorClass = 'bg-purple-600';
+                adviceText = '⚠️ 為了健康著想，建議諮詢營養師協助體重管理！';
+                markerPercent = 95;
+            }
+
+            // Animate Result Presentation
+            resultCard.classList.remove('hidden');
+            
+            // Value counter animation
+            let currentNum = 0;
+            const duration = 500;
+            const startTime = performance.now();
+
+            function animateValue(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const val = (progress * bmi).toFixed(1);
+                bmiValDisplay.innerText = val;
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateValue);
+                } else {
+                    bmiValDisplay.innerText = bmi.toFixed(1);
+                }
+            }
+            requestAnimationFrame(animateValue);
+
+            // Update UI elements
+            statusBadge.className = `inline-block px-4 py-1.5 rounded-full font-black text-sm text-white shadow-sm my-1 ${colorClass}`;
+            statusBadge.innerText = category;
+
+            weightAdvice.innerText = `理想體重區間：${minIdealW} ~ ${maxIdealW} kg`;
+            healthTip.innerText = adviceText;
+
+            // Move Marker Position
+            setTimeout(() => {
+                marker.style.left = `${Math.min(Math.max(markerPercent, 2), 95)}%`;
+            }, 100);
+        }
+
+        function resetForm() {
+            document.getElementById('bmi-form').reset();
+            const resultCard = document.getElementById('result-card');
+            resultCard.classList.add('hidden');
+            document.getElementById('bmi-marker').style.left = '0%';
+        }
+    </script>
+</body>
+</html>
